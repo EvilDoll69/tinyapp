@@ -28,15 +28,16 @@ app.post("/urls", (req, res) => {
   console.log(req.body);
   // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${newShortURL}`); 
-  
-  // const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };        
-  // res.send(urlDatabase.newShortURL = "longURL"); // ???
+
 });
 
 // app.post("/urls", (req, res) => {
 //   console.log(req.body);  // Log the POST request body to the console
 //   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 // });
+
+
+
 
 
 app.get("/urls/new", (req, res) => {
@@ -52,6 +53,14 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL]; //shortURL is a varioable
   res.redirect(longURL); //redirect to actual page
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
+  // 
+  const shortURL = req.params.shortURL;   
+  console.log(typeof(shortURL));
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");  
 });
 
 app.get("/", (req, res) => {
