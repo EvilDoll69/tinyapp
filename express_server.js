@@ -17,10 +17,27 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+function generateRandomString (length = 6 ) {
+  return (Math.random().toString(36).substr(2, length));
+  };
+
+app.post("/urls", (req, res) => {  
+  let newShortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[newShortURL] = longURL; //add to the page
+  console.log(req.body);
+  // console.log(req.body);  // Log the POST request body to the console
+  res.redirect(`/urls/${newShortURL}`); 
+  
+  // const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };        
+  // res.send(urlDatabase.newShortURL = "longURL"); // ???
 });
+
+// app.post("/urls", (req, res) => {
+//   console.log(req.body);  // Log the POST request body to the console
+//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+// });
+
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -29,6 +46,12 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL]; //shortURL is a varioable
+  res.redirect(longURL); //redirect to actual page
 });
 
 app.get("/", (req, res) => {
@@ -47,7 +70,10 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World<b><body><html>\n")
 });
 
-const generateRandomString = function (length = 6) {
-  return (Math.random().toString(20).substr(2, length));
-}
+
+
+
+ 
+  
+ 
 
