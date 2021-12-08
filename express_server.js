@@ -31,15 +31,6 @@ app.post("/urls", (req, res) => {
 
 });
 
-// app.post("/urls", (req, res) => {
-//   console.log(req.body);  // Log the POST request body to the console
-//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
-// });
-
-
-
-
-
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -55,6 +46,10 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL); //redirect to actual page
 });
 
+app.get("/urls/show", (req, res) => {
+  res.render("urls_show");
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
   // 
   const shortURL = req.params.shortURL;   
@@ -62,6 +57,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
   delete urlDatabase[shortURL];
   res.redirect("/urls");  
 });
+
+app.post("client's request", (req, res) => { // changing the URL
+
+});
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello!")
