@@ -88,7 +88,7 @@ app.post('/logout', (req, res) => {
 
 //register username
 
-const users = { 
+const usersDB = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
@@ -112,17 +112,19 @@ app.get("/register", (req, res) => {
 app.post('/register', (req, res) => {
   //video tutorial-----------
   const email = req.body.email;
-  const password = req.body.password;
-
-  //------------------
+  const password = req.body.password; 
   const userID = generateRandomString();
   const newUser = {
     id: userID,
-    email: req.body.email,
-    password: req.body.password
-  }
-  users[userID] = newUser;
-  console.log("/register, users", users);
+    email,
+    password
+  };
+  //add user to the Database
+  usersDB[userID] = newUser;
+  console.log("/register, users", usersDB);
+  //set the cookies => keep the user ID in the cookie
+  //asking the browser to keep that info 
+  
   res.cookie("username", newUser.email);
   res.redirect('/urls');
 });
