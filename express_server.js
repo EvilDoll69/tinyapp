@@ -113,6 +113,21 @@ app.post('/register', (req, res) => {
   //video tutorial-----------
   const email = req.body.email;
   const password = req.body.password; 
+
+  if (email.length === 0  || password.length === 0) {
+    res.status(400).send("400 ERROR");
+    return;
+  }
+
+  for (let userID in usersDB) {
+    const user = usersDB[userID]; //retreive the value through the key
+  
+    if (user.email === email) {
+      res.status(403).send("Sorry, User already exists!");
+      return; //we do not need ELSE because is this statement is never trigured, all will move on without this part
+    }
+  }
+
   const userID = generateRandomString();
   const newUser = {
     id: userID,
