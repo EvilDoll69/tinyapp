@@ -18,14 +18,12 @@
           <button type="submit" class="btn btn-dark">LOG OUT</button>
         </form>
    <% } else { %>
-    <form method="POST" action="/login">
-      <h2></h2>
-      <input type="text" name="username">
-      <button type="submit" class="btn btn-dark">LOG IN</button>      
-    </form>
-    <form method="get" action="/register">
-      <button type="submit" class="btn btn-dark">REGISTER</button>
-    </form>
+
+    <a href="http://localhost:8080/login?"><button type="submit" class="btn btn-dark">LOG IN</button> </a>
+
+    <a href="http://localhost:8080/register?"><button type="submit" class="btn btn-dark">REGISTER</button></a>
+
+    
     <% } %>
   </nav>
 </header>
