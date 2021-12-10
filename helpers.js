@@ -1,9 +1,9 @@
-const getUserByEmail = (usersDB, email) => {
+const getUserByEmail = (email, usersDB) => {
 
-  for (let user in usersDB) {
-    const userIdObject = usersDB[user]; //retreive the value through the key
+  for (const key in usersDB) {
+    const userIdObject = usersDB[key]; //retreive the value through the key
     if (userIdObject.email === email) {
-      return userIdObject; //object
+      return userIdObject;          //object
     }
   }
   return null;
