@@ -1,3 +1,4 @@
+const {getUserByEmail, generateRandomString} = require('./helpers');
 const express = require("express");
 const cookieSession = require('cookie-session');
 const app = express();
@@ -15,55 +16,36 @@ app.use(cookieSession({
   name: 'session',
   keys: ["Key1", "Key2"],
 
-//   // Cookie Options
-//   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 app.set("view engine", "ejs");
 
-function generateRandomString (length = 6 ) {
-  return (Math.random().toString(36).substr(2, length));
-  };
-
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 const urlDatabase = {
   b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "userRandomID"
+    longURL: "https://www.tsn.ca",
+    userID: "userRandomID"
   },
   i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "user2RandomID"
+    longURL: "https://www.google.ca",
+    userID: "user2RandomID"
   }
 };
 
-const usersDB = { 
+const usersDB = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
 
-const getUserByEmail = (usersDB, email) => {
-
-  for (let user in usersDB) {
-    const userIdObject = usersDB[user]; //retreive the value through the key
-    if (userIdObject.email === email) {
-      return userIdObject; //object
-    }
-  }
-  return null;
-};
+ 
 
 const urlsForUser = (id) => {
   console.log("Hello!", id);
@@ -73,8 +55,8 @@ const urlsForUser = (id) => {
     
     if (value.userID === id) {
       console.log(value);
-        URLs[url] = value;
-      }
+      URLs[url] = value;
+    }
   }
   console.log(URLs);
   return URLs;
@@ -82,48 +64,48 @@ const urlsForUser = (id) => {
 
 
 app.get("/urls", (req, res) => {
-  if(!req.session["user_id"]) {
+  if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
   }
-  const templateVars = { 
+  const templateVars = {
     urls: urlsForUser(req.session["user_id"]),
-    username: usersDB[req.session["user_id"]]  //entire user's object    
-  };  
+    username: usersDB[req.session["user_id"]]  //entire user's object
+  };
   console.log(templateVars);
-      return res.render("urls_index", templateVars);    
+  return res.render("urls_index", templateVars);
 });
 
 app.post("/urls/:id", (req, res) => {// updeted URL on the main page
-  if(!req.session["user_id"]) {
+  if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
-  };
-    const shortURL = req.params.id;
-    const newLongURL = req.body.newURL;
-    const newURL = urlDatabase[shortURL];
-   if(newURL.userID === req.session["user_id"]) {
+  }
+  const shortURL = req.params.id;
+  const newLongURL = req.body.newURL;
+  const newURL = urlDatabase[shortURL];
+  if (newURL.userID === req.session["user_id"]) {
     urlDatabase[shortURL].longURL = newLongURL;
-   } else {
-     return res.send("URL does not belong to you!")
-   }   
-      return res.redirect("/urls"); 
-  });
+  } else {
+    return res.send("URL does not belong to you!");
+  }
+  return res.redirect("/urls");
+});
 
-app.post("/urls", (req, res) => {  
+app.post("/urls", (req, res) => {
   let newShortURL = generateRandomString();
   const longURL = req.body.longURL;
   // urlDatabase[newShortURL] = longURL; //add to the page
   urlDatabase[newShortURL] = {
     longURL: longURL,
     userID: req.session["user_id"] // if the user new, we do not need all database(line 86)
-  }
+  };
   console.log(urlDatabase);
-  res.redirect(`/urls`); 
+  res.redirect(`/urls`);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
-    username: usersDB[req.session["user_id"]]  //entire user's object    
+    username: usersDB[req.session["user_id"]]  //entire user's object
   };
   if (!req.session["user_id"]) {
     res.redirect('/login');
@@ -133,9 +115,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL, 
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL].longURL,
     username: usersDB[req.session["user_id"]] };
   res.render("urls_show", templateVars);
 });
@@ -144,53 +126,52 @@ app.get("/u/:shortURL", (req, res) => { //redirect though the short URL
   
   // const shortURL = req.params.shortURL;
   for (let shortURL in urlDatabase) {       //checking if URL exist in the database
-    if(shortURL === req.params.shortURL) {
+    if (shortURL === req.params.shortURL) {
       const longURL = urlDatabase[shortURL].longURL;
-      return res.redirect(longURL);  
+      return res.redirect(longURL);
     } else {
       return res.status(404).send("Page does not exist!");   //redirect to actual page
-    } 
-  }                  
+    }
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
-  if(!req.session["user_id"]) {
+  if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
-  };
+  }
 
-  const shortURL = req.params.shortURL; 
-  const newLongURL = req.body.newURL;
-    const newURL = urlDatabase[shortURL];
-   if(newURL.userID === req.session["user_id"]) {
-    delete urlDatabase[shortURL];;
-   } else {
-     return res.send("URL does not belong to you!")
-   }   
-      return res.redirect("/urls"); 
-  });
+  const shortURL = req.params.shortURL;
+  const newURL = urlDatabase[shortURL];
+  if (newURL.userID === req.session["user_id"]) {
+    delete urlDatabase[shortURL];
+  } else {
+    return res.send("URL does not belong to you!");
+  }
+  return res.redirect("/urls");
+});
    
 
 //login username
-app.get('/login', (req, res) => { //gives an empty page   
-  const templateVars = { 
+app.get('/login', (req, res) => { //gives an empty page
+  const templateVars = {
     urls: urlDatabase,
     username: usersDB[req.session["user_id"]]  //entire user's object
-  };  
+  };
   if (templateVars.username) {
     res.redirect('/urls');
     return;
-  } 
+  }
   res.render(`urls_login`, templateVars);
 });
 
-app.post('/login', function (req, res) {  
+app.post('/login', function(req, res) {
   const email = req.body.email;
-  const password = req.body.password; 
+  const password = req.body.password;
 
   if (email.length === 0  || password.length === 0) {
     res.status(400).send("400 ERROR");
     return;
-  };
+  }
 
   const user = getUserByEmail(usersDB, email);
   if (user) {
@@ -199,15 +180,15 @@ app.post('/login', function (req, res) {
       res.redirect('/urls');
       return;
     } else {
-      res.status(401).send("Incorrect password")
-    }    
+      res.status(401).send("Incorrect password");
+    }
   } else {
     res.status(401).send("Email not found");
   }
 
   //looking up th existing user
   //set the cookies => keep the user ID in the cookie
-  //asking the browser to keep that info   
+  //asking the browser to keep that info
   
 });
 //logout username
@@ -220,9 +201,9 @@ app.post('/logout', (req, res) => {
 
 
 app.get("/register", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
-    username: usersDB[req.session["user_id"]]  //entire user's object    
+    username: usersDB[req.session["user_id"]]  //entire user's object
   };
   if (templateVars.username) {
     res.redirect('/urls');
@@ -234,17 +215,14 @@ app.get("/register", (req, res) => {
 //receive the info from the register form
 app.post('/register', (req, res) => {
   const email = req.body.email;
-  const password = req.body.password; 
+  const password = req.body.password;
 
   if (email.length === 0  || password.length === 0) {
     res.status(400).send("400 ERROR");
     return;
   }
-
   
   const hashedPassword = bcrypt.hashSync(password, 10);
-
-
 
   for (let userID in usersDB) {
     const user = usersDB[userID]; //retreive the value through the key
@@ -265,7 +243,7 @@ app.post('/register', (req, res) => {
   usersDB[userID] = newUser;
 
   //set the cookies => keep the user ID in the cookie
-  //asking the browser to keep that info 
+  //asking the browser to keep that info
  
   req.session.user_id = newUser.id;
   res.redirect('/urls');
@@ -273,11 +251,11 @@ app.post('/register', (req, res) => {
 
 
 app.get("/", (req, res) => {
-  res.send("Hello!")
+  res.send("Hello!");
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
+  console.log(`Example app listening on port ${PORT}`);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -285,7 +263,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World<b><body><html>\n")
+  res.send("<html><body>Hello <b>World<b><body><html>\n");
 });
 
  
