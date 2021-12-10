@@ -19,7 +19,7 @@
       <h2>EDIT</h3>
       <form method="POST" action="/urls/<%= shortURL%>">
         <label>New URL</label>
-        <input type="text" id="newURL" name="newURL">
+        <input type="text" id="newURL" name="newURL" value="<%= longURL %>">
         <button class="btn btn-primary" type="submit">Submit</button>
       </form>
     </div>

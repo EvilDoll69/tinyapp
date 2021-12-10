@@ -14,9 +14,20 @@ function generateRandomString (length = 6 ) {
   return (Math.random().toString(36).substr(2, length));
   };
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "userRandomID"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "user2RandomID"
+  }
 };
 
 const usersDB = { 
@@ -41,28 +52,61 @@ const getUserByEmail = (usersDB, email) => {
     }
   }
   return null;
-}
+};
+
+const urlsForUser = (id) => {
+  console.log("Hello!", id);
+  const URLs = {};
+  for (let url in urlDatabase) { //userID is equal to the id of the currently logged-in user
+    const value = urlDatabase[url];  //value = object
+    
+    if (value.userID === id) {
+      console.log(value);
+        URLs[url] = value;
+      }
+  }
+  console.log(URLs);
+  return URLs;
+};
+
 
 app.get("/urls", (req, res) => {
+  if(!req.cookies["user_id"]) {
+    return res.send("Log In or Register to visit a page!");
+  }
   const templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
     username: usersDB[req.cookies["user_id"]]  //entire user's object    
-  };
-  res.render("urls_index", templateVars);
+  };  
+  console.log(templateVars);
+      return res.render("urls_index", templateVars);    
 });
 
-app.post("/urls/:id", (req, res) => {// changing the URL
-   const shortURL = req.params.id;
-   const newLongURL = req.body.newURL;
-   urlDatabase[shortURL] = newLongURL;
-   res.redirect("/urls");
+app.post("/urls/:id", (req, res) => {// updeted URL on the main page
+  if(!req.cookies["user_id"]) {
+    return res.send("Log In or Register to visit a page!");
+  };
+    const shortURL = req.params.id;
+    const newLongURL = req.body.newURL;
+    const newURL = urlDatabase[shortURL];
+   if(newURL.userID === req.cookies["user_id"]) {
+    urlDatabase[shortURL].longURL = newLongURL;
+   } else {
+     return res.send("URL does not belong to you!")
+   }   
+      return res.redirect("/urls"); 
   });
 
 app.post("/urls", (req, res) => {  
   let newShortURL = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[newShortURL] = longURL; //add to the page
-  res.redirect(`/urls/${newShortURL}`); 
+  // urlDatabase[newShortURL] = longURL; //add to the page
+  urlDatabase[newShortURL] = {
+    longURL: longURL,
+    userID: req.cookies["user_id"] // if the user new, we do not need all database(line 86)
+  }
+  console.log(urlDatabase);
+  res.redirect(`/urls`); 
 });
 
 app.get("/urls/new", (req, res) => {
@@ -70,26 +114,50 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     username: usersDB[req.cookies["user_id"]]  //entire user's object    
   };
+  if (!req.cookies["user_id"]) {
+    res.redirect('/login');
+    return;
+  }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: usersDB[req.cookies["user_id"]] };
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL].longURL, 
+    username: usersDB[req.cookies["user_id"]] };
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]; //shortURL is a varioable
-  res.redirect(longURL);                  //redirect to actual page
+app.get("/u/:shortURL", (req, res) => { //redirect though the short URL
+  
+  // const shortURL = req.params.shortURL;
+  for (let shortURL in urlDatabase) {       //checking if URL exist in the database
+    if(shortURL === req.params.shortURL) {
+      const longURL = urlDatabase[shortURL].longURL;
+      return res.redirect(longURL);  
+    } else {
+      return res.status(404).send("Page does not exist!");   //redirect to actual page
+    } 
+  }                  
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
-  const shortURL = req.params.shortURL;   
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");  
-});
+  if(!req.cookies["user_id"]) {
+    return res.send("Log In or Register to visit a page!");
+  };
 
+  const shortURL = req.params.shortURL; 
+  const newLongURL = req.body.newURL;
+    const newURL = urlDatabase[shortURL];
+   if(newURL.userID === req.cookies["user_id"]) {
+    delete urlDatabase[shortURL];;
+   } else {
+     return res.send("URL does not belong to you!")
+   }   
+      return res.redirect("/urls"); 
+  });
+   
 
 //login username
 app.get('/login', (req, res) => { //gives an empty page   
@@ -97,6 +165,10 @@ app.get('/login', (req, res) => { //gives an empty page
     urls: urlDatabase,
     username: usersDB[req.cookies["user_id"]]  //entire user's object
   };  
+  if (templateVars.username) {
+    res.redirect('/urls');
+    return;
+  } 
   res.render(`urls_login`, templateVars);
 });
 
@@ -141,7 +213,11 @@ app.get("/register", (req, res) => {
     urls: urlDatabase,
     username: usersDB[req.cookies["user_id"]]  //entire user's object    
   };
-  console.log(templateVars.username)
+  if (templateVars.username) {
+    res.redirect('/urls');
+    return;
+  }
+  
   res.render('urls_register',templateVars);
 });
 //receive the info from the register form
