@@ -55,7 +55,6 @@ const urlsForUser = (id) => {
   return URLs;
 };
 
-
 app.get("/urls", (req, res) => {
   if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
@@ -113,7 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
     username: usersDB[req.session["user_id"]] };
   res.render("urls_show", templateVars);
 });
-
+//-------------------EDITING URL-------------------//
 app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
   for (let shortURL in urlDatabase) {         //checking if URL exist in the database
     if (shortURL === req.params.shortURL) {
@@ -124,7 +123,7 @@ app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
     }
   }
 });
-
+//--------------------DELITING PAGE---------------------//
 app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
   if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
@@ -141,7 +140,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
 });
    
 
-//login username
+//--------------------------LOGIN------------------------//
 app.get('/login', (req, res) => {             //gives an empty page
   const templateVars = {
     urls: urlDatabase,
@@ -177,13 +176,13 @@ app.post('/login', function(req, res) {
   }
 
 });
-//----------------logout username--------------------//
+//--------------------LOGOUT--------------------//
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
-//----------------register username-----------------//
+//----------------REGISTER NEW USER-----------------//
 app.get("/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
