@@ -7,19 +7,14 @@ const PORT = 8080; //default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 
-
-
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 app.use(cookieSession({
   name: 'session',
   keys: ["Key1", "Key2"],
-
 }));
 
 app.set("view engine", "ejs");
-
 
 const urlDatabase = {
   b6UTxQ: {
@@ -43,14 +38,12 @@ const usersDB = {
     email: "user2@example.com",
     password: "dishwasher-funk"
   }
-};
-
- 
+}; 
 
 const urlsForUser = (id) => {
   console.log("Hello!", id);
   const URLs = {};
-  for (let url in urlDatabase) { //userID is equal to the id of the currently logged-in user
+  for (let url in urlDatabase) {      //userID is equal to the id of the currently logged-in user
     const value = urlDatabase[url];  //value = object
     
     if (value.userID === id) {
@@ -75,7 +68,7 @@ app.get("/urls", (req, res) => {
   return res.render("urls_index", templateVars);
 });
 
-app.post("/urls/:id", (req, res) => {// updeted URL on the main page
+app.post("/urls/:id", (req, res) => {         // updeted URL on the main page
   if (!req.session["user_id"]) {
     return res.send("Log In or Register to visit a page!");
   }
@@ -93,10 +86,9 @@ app.post("/urls/:id", (req, res) => {// updeted URL on the main page
 app.post("/urls", (req, res) => {
   let newShortURL = generateRandomString();
   const longURL = req.body.longURL;
-  // urlDatabase[newShortURL] = longURL; //add to the page
   urlDatabase[newShortURL] = {
     longURL: longURL,
-    userID: req.session["user_id"] // if the user new, we do not need all database(line 86)
+    userID: req.session["user_id"]    //if the user is new, we do not need all database
   };
   console.log(urlDatabase);
   res.redirect(`/urls`);
@@ -122,10 +114,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => { //redirect though the short URL
-  
-  // const shortURL = req.params.shortURL;
-  for (let shortURL in urlDatabase) {       //checking if URL exist in the database
+app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
+  for (let shortURL in urlDatabase) {         //checking if URL exist in the database
     if (shortURL === req.params.shortURL) {
       const longURL = urlDatabase[shortURL].longURL;
       return res.redirect(longURL);
@@ -152,7 +142,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
    
 
 //login username
-app.get('/login', (req, res) => { //gives an empty page
+app.get('/login', (req, res) => {             //gives an empty page
   const templateVars = {
     urls: urlDatabase,
     username: usersDB[req.session["user_id"]]  //entire user's object
@@ -186,20 +176,14 @@ app.post('/login', function(req, res) {
     res.status(401).send("Email not found");
   }
 
-  //looking up th existing user
-  //set the cookies => keep the user ID in the cookie
-  //asking the browser to keep that info
-  
 });
-//logout username
+//----------------logout username--------------------//
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
-//register username
-
-
+//----------------register username-----------------//
 app.get("/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -225,11 +209,11 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   for (let userID in usersDB) {
-    const user = usersDB[userID]; //retreive the value through the key
+    const user = usersDB[userID];           //retreive the value through the key
   
     if (user.email === email) {
       res.status(403).send("Sorry, User already exists!");
-      return; //we do not need ELSE because is this statement is never trigured, all will move on without this part
+      return; //we do not need ELSE because if this statement is never triggered, all will move on without this part
     }
   }
 
