@@ -31,7 +31,7 @@ const usersDB = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2a$10$TYkQxQTUsyc/XFS20X3zye/IbiMtk1jRtSTXSAU0h1vJeRwfcWKr."
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -57,7 +57,7 @@ const urlsForUser = (id) => {
 
 app.get("/urls", (req, res) => {
   if (!req.session["user_id"]) {
-    return res.send("Log In or Register to visit a page!");
+    return res.send("<a href='/login'>Log In</a> or <a href ='/register'>Register</a> to visit a page");
   }
   const templateVars = {
     urls: urlsForUser(req.session["user_id"]),
@@ -126,7 +126,7 @@ app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
 //--------------------DELITING PAGE---------------------//
 app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
   if (!req.session["user_id"]) {
-    return res.send("Log In or Register to visit a page!");
+    return res.send("<a href='/login'>Log In</a> or <a href ='/register'>Register</a> to visit a page!");
   }
 
   const shortURL = req.params.shortURL;
@@ -157,8 +157,8 @@ app.post('/login', function(req, res) {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (email.length === 0  || password.length === 0) {
-    res.status(400).send("400 ERROR");
+  if (!email || !password) {
+    res.status(400).send("Missing email or password. Please <a href='/login'>try again</a>");
     return;
   }
 
@@ -200,21 +200,20 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (email.length === 0  || password.length === 0) {
-    res.status(400).send("400 ERROR");
+  if (!email || !password) {
+    res.status(400).send("Missing email or password. Please <a href='/register'>try again</a>");
     return;
   }
   
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  for (let userID in usersDB) {
-    const user = usersDB[userID];           //retreive the value through the key
+  // for (let userID in usersDB) {
+  //   const user = usersDB[userID];           //retreive the value through the key
   
-    if (user.email === email) {
-      res.status(403).send("Sorry, User already exists!");
+    if (getUserByEmail(usersDB, email)) {
+      res.status(403).send("Sorry, User already exists! Please <a href='/login'>try to</a>");
       return; //we do not need ELSE because if this statement is never triggered, all will move on without this part
     }
-  }
 
   const userID = generateRandomString();
   const newUser = {
@@ -224,7 +223,6 @@ app.post('/register', (req, res) => {
   };
   //add user to the Database
   usersDB[userID] = newUser;
-
   //set the cookies => keep the user ID in the cookie
   //asking the browser to keep that info
  
