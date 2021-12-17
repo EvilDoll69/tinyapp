@@ -61,6 +61,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//Redirect a user to register if not a valid user
+app.get("/", (req, res) => {
+  res.redirect("/register");
+});
+
 //Handles Login request
 app.get('/login', (req, res) => {          
   const templateVars = {
@@ -69,31 +74,30 @@ app.get('/login', (req, res) => {
   res.render(`login`, templateVars);
 });
 
+//Only show links to users that creates them
 app.get("/urls", (req, res) => {
-  if (!req.session["user_id"]) {
-    return res.send("<a href='/login'>Log In</a> or <a href ='/register'>Register</a> to visit a page");
+  const user_id = req.session["user_id"];
+  const user = usersDB[user_id]
+  const urls = {};
+
+  for(let url in urlDatabase) {
+    if(user_id === urlDatabase[url].userID) {
+      urls[url] = urlDatabase[url].longURL;
+    }
   }
-  const templateVars = {
-    urls: urlsForUser(req.session["user_id"]),
-    username: usersDB[req.session["user_id"]]  //entire user's object
-  };
-  console.log(templateVars);
-  return res.render("urls_index", templateVars);
+  const templateVars = {urls: urls, user: user};
+  res.render("urls_index", templateVars);
 });
 
-app.get("/", (req, res) => {
-  res.redirect("/register");
-});
 
+//Redirect a user to log in if it tries to access create link
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    username: usersDB[req.session["user_id"]]  //entire user's object
-  };
-  if (!req.session["user_id"]) {
+  const user_id = req.session["user_id"];
+  if (!user_id) {
     res.redirect('/login');
-    return;
   }
+  const user = user[user_id];
+  const templateVars = {user: user};
   res.render("urls_new", templateVars);
 });
 
