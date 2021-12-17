@@ -101,15 +101,22 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
-  for (let shortURL in urlDatabase) {         //checking if URL exist in the database
-    if (shortURL === req.params.shortURL) {
-      const longURL = urlDatabase[shortURL].longURL;
-      return res.redirect(longURL);
-    } else {
-      return res.status(404).send("Page does not exist!");   //redirect to actual page
-    }
+//When a user tries to access an invalid link
+app.get("/u/:shortURL", (req, res) => { 
+  const user_id = req.session["user_id"];
+  const user = usersDB[user_id];
+
+  const { longURL } = urlDatabase[req.params.shortURL] || {};
+  if(!longURL) {
+    return res.status(404).send(`<h1 text-align: center; >STOP! TRYING TO access an invalid LINK!!!</h1>`)
   }
+  
+  const templateVars = {
+    shortURL = req.params.shortURL,
+    longURL,
+    user: user,
+  };
+  res.render("urls_show", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
