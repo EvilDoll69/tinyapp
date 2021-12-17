@@ -1,19 +1,21 @@
 const {getUserByEmail, generateRandomString} = require('./helpers');
 const express = require("express");
-const cookieSession = require('cookie-session');
-app.use(bodyParser.urlencoded({extended: true}));
+const bodyParser = require("body-parser");
 const app = express();
 const PORT = 8080; //default port 8080
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  secret: "8f20be78-5940-11ec-bf63-0242ac130002"}));
+app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
 
-const bodyParser = require("body-parser");
+
+
 const bcrypt = require('bcryptjs');
 
 
-app.use(cookieSession({
-  name: 'session',
-  keys: "8f20be78-5940-11ec-bf63-0242ac130002"}));
 
-app.set("view engine", "ejs");
 
 const urlDatabase = {
   b6UTxQ: {
@@ -39,20 +41,20 @@ const usersDB = {
   }
 }; 
 
-const urlsForUser = (id) => {
-  console.log("Hello!", id);
-  const URLs = {};
-  for (let url in urlDatabase) {      //userID is equal to the id of the currently logged-in user
-    const value = urlDatabase[url];  //value = object
+// const urlsForUser = (id) => {
+//   console.log("Hello!", id);
+//   const URLs = {};
+//   for (let url in urlDatabase) {      //userID is equal to the id of the currently logged-in user
+//     const value = urlDatabase[url];  //value = object
     
-    if (value.userID === id) {
-      console.log(value);
-      URLs[url] = value;
-    }
-  }
-  console.log(URLs);
-  return URLs;
-};
+//     if (value.userID === id) {
+//       console.log(value);
+//       URLs[url] = value;
+//     }
+//   }
+//   console.log(URLs);
+//   return URLs;
+// };
 
 app.get("/urls", (req, res) => {
   if (!req.session["user_id"]) {
@@ -66,30 +68,8 @@ app.get("/urls", (req, res) => {
   return res.render("urls_index", templateVars);
 });
 
-app.post("/urls/:id", (req, res) => {         // updeted URL on the main page
-  if (!req.session["user_id"]) {
-    return res.send("Log In or Register to visit a page!");
-  }
-  const shortURL = req.params.id;
-  const newLongURL = req.body.newURL;
-  const newURL = urlDatabase[shortURL];
-  if (newURL.userID === req.session["user_id"]) {
-    urlDatabase[shortURL].longURL = newLongURL;
-  } else {
-    return res.send("URL does not belong to you!");
-  }
-  return res.redirect("/urls");
-});
-
-app.post("/urls", (req, res) => {
-  let newShortURL = generateRandomString();
-  const longURL = req.body.longURL;
-  urlDatabase[newShortURL] = {
-    longURL: longURL,
-    userID: req.session["user_id"]    //if the user is new, we do not need all database
-  };
-  console.log(urlDatabase);
-  res.redirect(`/urls`);
+app.get("/", (req, res) => {
+  res.redirect("/register");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -111,6 +91,37 @@ app.get("/urls/:shortURL", (req, res) => {
     username: usersDB[req.session["user_id"]] };
   res.render("urls_show", templateVars);
 });
+
+
+
+app.post("/urls/:id", (req, res) => {         // updeted URL on the main page
+  if (!req.session["user_id"]) {
+    return res.send("Log In or Register to visit a page!");
+  }
+  const shortURL = req.params.id;
+  const newLongURL = req.body.newURL;
+  const newURL = urlDatabase[shortURL];
+  if (newURL.userID === req.session["user_id"]) {
+    urlDatabase[shortURL].longURL = newLongURL;
+  } else {
+    return res.send("URL does not belong to you!");
+  }
+  return res.redirect("/urls");
+});
+
+
+
+app.post("/urls", (req, res) => {
+  let newShortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[newShortURL] = {
+    longURL: longURL,
+    userID: req.session["user_id"]    //if the user is new, we do not need all database
+  };
+  console.log(urlDatabase);
+  res.redirect(`/urls`);
+});
+
 
 //-------------------EDITING URL-------------------//
 app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
@@ -230,9 +241,6 @@ app.post('/register', (req, res) => {
 });
 
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
