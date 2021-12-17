@@ -194,37 +194,29 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //receive the info from the register form
 app.post('/register', (req, res) => {
+  const user_id = generateRandomString();
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, salt);
+
 
   if (!email || !password) {
-    res.status(400).send("Missing email or password. Please <a href='/register'>try again</a>");
-    return;
+    return res.status(400).send("Missing email or password");
   }
   
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const user = getUserByEmail(email, usersDB);
+  if(user) {
+    return res.status(400).send("A user with that email already exists");
+  }
 
-  // for (let userID in usersDB) {
-  //   const user = usersDB[userID];           //retreive the value through the key
-  
-    if (getUserByEmail(usersDB, email)) {
-      res.status(403).send("Sorry, User already exists! Please <a href='/login'>try to register!</a>");
-      return; //we do not need ELSE because if this statement is never triggered, all will move on without this part
-    }
-
-  const userID = generateRandomString();
-  const newUser = {
-    id: userID,
-    email,
-    password: hashedPassword
+  usersDB[user_id] = {
+    id: user_id,
+    email: email,
+    password: password,
   };
-  //add user to the Database
-  usersDB[userID] = newUser;
-  //set the cookies => keep the user ID in the cookie
-  //asking the browser to keep that info
- 
-  req.session.user_id = newUser.id;
-  res.redirect('/urls');
+
+  req.session["user_id"] = user_id;
+  res.redirect("/urls");
+
 });
 
 
