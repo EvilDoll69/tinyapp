@@ -96,7 +96,7 @@ app.get("/urls/new", (req, res) => {
   if (!user_id) {
     res.redirect('/login');
   }
-  const user = user[user_id];
+  const user = usersDB[user_id];
   const templateVars = {user: user};
   res.render("urls_new", templateVars);
 });
@@ -112,7 +112,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
   
   const templateVars = {
-    shortURL = req.params.shortURL,
+    shortURL: req.params.shortURL,
     longURL,
     user: user,
   };
