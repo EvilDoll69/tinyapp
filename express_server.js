@@ -135,9 +135,31 @@ res.redirect(longURL);
 
 //Handles editing post request
 app.post("/urls/:shortURL", (req, res) => {        
-
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL].longURL = req.body.updatedURL;
+  res.redirect("/urls");
+});
+
+//Handles Post to /login for a user
+app.post('/login', function(req, res) {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!email || !password) {
+    res.status(403).send("Email and Password Cannot be Blank!");
+  }
+
+  const user = authenticateUser(email, password, usersDB);
+  if (user) {
+    req.session["user_id"] = user.id;
+    res.redirect("/urls");
+    } else {
+      res.status(401).send("Your credentials doesn't match");
+    }
+});
+// Clears cookie
+app.post('/logout', (req, res) => {
+  req.session["user_id"] = null;
   res.redirect("/urls");
 });
 
@@ -169,36 +191,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
   return res.redirect("/urls");
 });
    
-
-//--------------------------LOGIN------------------------//
-
-app.post('/login', function(req, res) {
-  const email = req.body.email;
-  const password = req.body.password;
-
-  if (!email || !password) {
-    res.status(403).send("Email and Password Cannot be Blank!");
-  }
-
-  const user = getUserByEmail(usersDB, email);
-  if (user) {
-    if (bcrypt.compareSync(password, user.password)) {
-      req.session.user_id = user.id;
-      res.redirect('/urls');
-      return;
-    } else {
-      res.status(401).send("Incorrect password");
-    }
-  } else {
-    res.status(401).send("Email not found");
-  }
-
-});
-//--------------------LOGOUT--------------------//
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect("/urls");
-});
 
 //receive the info from the register form
 app.post('/register', (req, res) => {
