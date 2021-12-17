@@ -163,6 +163,7 @@ app.post('/logout', (req, res) => {
   res.redirect("/urls");
 });
 
+//handles post request for create/modifying
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.status(404).send("you need to login to create/modify a TinyURL");
@@ -171,24 +172,23 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = {longURL: longURL, userID: userID};
-  res
+  res.redirect(`/urls/${shortURL}`);
 });
 
 
-//--------------------DELITING PAGE---------------------//
-app.post("/urls/:shortURL/delete", (req, res) => {  //creating a variable
-  if (!req.session["user_id"]) {
-    return res.send("<a href='/login'>Log In</a> or <a href ='/register'>Register</a> to visit a page!");
-  }
-
+//Handles delete post
+app.post("/urls/:shortURL/delete", (req, res) => {  
+ const userID = req.session["user_id"];
   const shortURL = req.params.shortURL;
-  const newURL = urlDatabase[shortURL];
-  if (newURL.userID === req.session["user_id"]) {
-    delete urlDatabase[shortURL];
-  } else {
-    return res.send("URL does not belong to you!");
+
+  //Only authorized users can delete / edit
+  if (shortURL in urlDatabase) {
+    if(userID === urlDatabase[shortURL].userID) {
+      delete urlDatabase[shortURL];
+      res.redirect("/urls");
+    }
   }
-  return res.redirect("/urls");
+  res.send("You're not authorized to do that.")
 });
    
 
