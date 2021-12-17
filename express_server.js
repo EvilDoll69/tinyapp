@@ -1,18 +1,17 @@
 const {getUserByEmail, generateRandomString} = require('./helpers');
 const express = require("express");
 const cookieSession = require('cookie-session');
+app.use(bodyParser.urlencoded({extended: true}));
 const app = express();
 const PORT = 8080; //default port 8080
 
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 
-app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(cookieSession({
   name: 'session',
-  keys: ["Key1", "Key2"],
-}));
+  keys: "8f20be78-5940-11ec-bf63-0242ac130002"}));
 
 app.set("view engine", "ejs");
 
@@ -159,8 +158,7 @@ app.post('/login', function(req, res) {
   const password = req.body.password;
 
   if (!email || !password) {
-    res.status(400).send("Missing email or password. Please <a href='/login'>try again</a>");
-    return;
+    res.status(403).send("Email and Password Cannot be Blank!");
   }
 
   const user = getUserByEmail(usersDB, email);
