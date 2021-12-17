@@ -164,14 +164,14 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  let newShortURL = generateRandomString();
+  if (!req.session.user_id) {
+    return res.status(404).send("you need to login to create/modify a TinyURL");
+  }
+  const userID = req.session["user_id"];
+  const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[newShortURL] = {
-    longURL: longURL,
-    userID: req.session["user_id"]    //if the user is new, we do not need all database
-  };
-  console.log(urlDatabase);
-  res.redirect(`/urls`);
+  urlDatabase[shortURL] = {longURL: longURL, userID: userID};
+  res
 });
 
 
