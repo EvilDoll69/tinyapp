@@ -112,6 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
     username: usersDB[req.session["user_id"]] };
   res.render("urls_show", templateVars);
 });
+
 //-------------------EDITING URL-------------------//
 app.get("/u/:shortURL", (req, res) => {       //redirect though the short URL
   for (let shortURL in urlDatabase) {         //checking if URL exist in the database
@@ -211,7 +212,7 @@ app.post('/register', (req, res) => {
   //   const user = usersDB[userID];           //retreive the value through the key
   
     if (getUserByEmail(usersDB, email)) {
-      res.status(403).send("Sorry, User already exists! Please <a href='/login'>try to</a>");
+      res.status(403).send("Sorry, User already exists! Please <a href='/login'>try to register!</a>");
       return; //we do not need ELSE because if this statement is never triggered, all will move on without this part
     }
 
