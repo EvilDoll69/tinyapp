@@ -120,11 +120,8 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    username: usersDB[req.session["user_id"]] };
-  res.render("urls_show", templateVars);
+const longURL = urlDatabase[req.params.shortURL].longURL;
+res.redirect(longURL);
 });
 
 
