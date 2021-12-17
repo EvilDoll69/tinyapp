@@ -1,3 +1,7 @@
+//Encryption
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10)
+
 const getUserByEmail = (email, database) => {
   for (const userId in database) {
     const user = database[userId]; //retreive the value through the key

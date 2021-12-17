@@ -1,4 +1,4 @@
-const {getUserByEmail, generateRandomString} = require('./helpers');
+const {getUserByEmail, generateRandomString, authenticateUser} = require('./helpers');
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -10,9 +10,8 @@ app.use(cookieSession({
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-
-
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
 
 
 
@@ -29,32 +28,19 @@ const urlDatabase = {
 };
 
 const usersDB = {
-  "userRandomID": {
+  userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
     password: "$2a$10$TYkQxQTUsyc/XFS20X3zye/IbiMtk1jRtSTXSAU0h1vJeRwfcWKr."
   },
-  "user2RandomID": {
+  user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
+    password: "dishwasher-funk",
+  },
 }; 
 
-// const urlsForUser = (id) => {
-//   console.log("Hello!", id);
-//   const URLs = {};
-//   for (let url in urlDatabase) {      //userID is equal to the id of the currently logged-in user
-//     const value = urlDatabase[url];  //value = object
-    
-//     if (value.userID === id) {
-//       console.log(value);
-//       URLs[url] = value;
-//     }
-//   }
-//   console.log(URLs);
-//   return URLs;
-// };
+
 
 //testing purposes
 app.get("/urls.json", (req, res) => {
@@ -82,15 +68,16 @@ app.get("/register", (req, res) => {
 //Only show links to users that creates them
 app.get("/urls", (req, res) => {
   const user_id = req.session["user_id"];
-  const user = usersDB[user_id]
+  const user = usersDB[user_id];
   const urls = {};
 
-  for(let url in urlDatabase) {
-    if(user_id === urlDatabase[url].userID) {
+  for (let url in urlDatabase) {
+    ///adding urls to the new urls / belongs to the user
+    if (user_id === urlDatabase[url].userID) {
       urls[url] = urlDatabase[url].longURL;
     }
   }
-  const templateVars = {urls: urls, user: user};
+  const templateVars = { urls: urls, user: user };
   res.render("urls_index", templateVars);
 });
 
@@ -99,15 +86,15 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user_id = req.session["user_id"];
   if (!user_id) {
-    res.redirect('/login');
+    res.redirect("/login");
   }
   const user = usersDB[user_id];
-  const templateVars = {user: user};
+  const templateVars = { user: user };
   res.render("urls_new", templateVars);
 });
 
 //When a user tries to access an invalid link
-app.get("/u/:shortURL", (req, res) => { 
+app.get("/urls/:shortURL", (req, res) => { 
   const user_id = req.session["user_id"];
   const user = usersDB[user_id];
 
@@ -125,9 +112,9 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //Creating Long URLS
-app.get("/urls/:shortURL", (req, res) => {
-const longURL = urlDatabase[req.params.shortURL].longURL;
-res.redirect(longURL);
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL);
 });
 
 
@@ -166,29 +153,29 @@ app.post('/logout', (req, res) => {
 //handles post request for create/modifying
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
-    return res.status(404).send("you need to login to create/modify a TinyURL");
+    return res.status(404).send("You need to login to create/modify a TinyURL\n");
   }
   const userID = req.session["user_id"];
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = {longURL: longURL, userID: userID};
-  res.redirect(`/urls/${shortURL}`);
+  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
+  res.redirect(`/urls/${shortURL}`); 
 });
 
 
-//Handles delete post
-app.post("/urls/:shortURL/delete", (req, res) => {  
- const userID = req.session["user_id"];
-  const shortURL = req.params.shortURL;
 
+//Handles delete post
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const userID = req.session["user_id"];
+  const shortURL = req.params.shortURL;
   //Only authorized users can delete / edit
   if (shortURL in urlDatabase) {
-    if(userID === urlDatabase[shortURL].userID) {
+    if (userID === urlDatabase[shortURL].userID) {
       delete urlDatabase[shortURL];
       res.redirect("/urls");
     }
   }
-  res.send("You're not authorized to do that.")
+  res.send("You're not authorized to do that");
 });
    
 
