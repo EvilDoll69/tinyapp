@@ -74,6 +74,11 @@ app.get('/login', (req, res) => {
   res.render(`login`, templateVars);
 });
 
+// Handles route for register
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
 //Only show links to users that creates them
 app.get("/urls", (req, res) => {
   const user_id = req.session["user_id"];
@@ -119,39 +124,21 @@ app.get("/u/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//Creating Long URLS
 app.get("/urls/:shortURL", (req, res) => {
 const longURL = urlDatabase[req.params.shortURL].longURL;
 res.redirect(longURL);
 });
 
 
-//----------------REGISTER NEW USER-----------------//
-app.get("/register", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    username: usersDB[req.session["user_id"]]  //entire user's object
-  };
-  if (templateVars.username) {
-    res.redirect('/urls');
-    return;
-  }
-  
-  res.render('urls_register',templateVars);
-});
+// *************************************POST ENDPOINTS*******************************************
 
-app.post("/urls/:id", (req, res) => {         // updeted URL on the main page
-  if (!req.session["user_id"]) {
-    return res.send("Log In or Register to visit a page!");
-  }
-  const shortURL = req.params.id;
-  const newLongURL = req.body.newURL;
-  const newURL = urlDatabase[shortURL];
-  if (newURL.userID === req.session["user_id"]) {
-    urlDatabase[shortURL].longURL = newLongURL;
-  } else {
-    return res.send("URL does not belong to you!");
-  }
-  return res.redirect("/urls");
+//Handles editing post request
+app.post("/urls/:shortURL", (req, res) => {        
+
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL].longURL = req.body.updatedURL;
+  res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
