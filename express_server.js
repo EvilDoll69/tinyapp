@@ -1,4 +1,4 @@
-const {getUserByEmail, generateRandomString, authenticateUser} = require('./helpers');
+const {getUserByEmail, generateRandomString, authenticateUser,urlsForUser} = require('./helpers');
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -12,7 +12,6 @@ app.set("view engine", "ejs");
 
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
-
 
 
 
@@ -41,7 +40,6 @@ const usersDB = {
 }; 
 
 
-
 //testing purposes
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -67,19 +65,18 @@ app.get("/register", (req, res) => {
 
 //Only show links to users that creates them
 app.get("/urls", (req, res) => {
-  const user_id = req.session["user_id"];
-  const user = usersDB[user_id];
-  const urls = {};
-
-  for (let url in urlDatabase) {
-    ///adding urls to the new urls / belongs to the user
-    if (user_id === urlDatabase[url].userID) {
-      urls[url] = urlDatabase[url].longURL;
-    }
+  const userID = req.session.user_id;
+  
+  if(userID) {
+    const urlUserObject = urlsForUser(userID, urlDatabase);
+    const templateVars = {
+      urls: urlUserObject,
+      user: usersDB[req.session.user_id],
+    };
+    return res.render("urls_index", templateVars);
   }
-  const templateVars = { urls: urls, user: user };
-  res.render("urls_index", templateVars);
-});
+  res.redirect("/login");
+})
 
 
 //Redirect a user to log in if it tries to access create link
@@ -120,11 +117,18 @@ app.get("/u/:shortURL", (req, res) => {
 
 // *************************************POST ENDPOINTS*******************************************
 
-//Handles editing post request
-app.post("/urls/:shortURL", (req, res) => {        
-  const shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.updatedURL;
-  res.redirect("/urls");
+//Validation for editing Links
+app.post("/urls/:shortURL", (req, res) => {
+  const userID = req.session.user_id;
+  const userUrls = urlsForUser(userID, urlDatabase);
+
+  if (Object.keys(userUrls).includes(req.params.shortURL)) {
+    const shortURL = req.params.shortURL;
+    urlDatabase[shortURL].longURL = req.body.updatedURL;
+    res.redirect("/urls");
+  } else {
+    res.status(401).send("You're not allowed to access this shortURL.");
+  }
 });
 
 //Handles Post to /login for a user
@@ -146,8 +150,9 @@ app.post('/login', function(req, res) {
 });
 // Clears cookie
 app.post('/logout', (req, res) => {
-  req.session["user_id"] = null;
-  res.redirect("/urls");
+  res.clearCookie('session');
+  res.clearCookie('session.sig');
+  res.redirect('/urls');
 });
 
 //handles post request for create/modifying

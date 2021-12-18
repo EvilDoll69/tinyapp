@@ -29,13 +29,23 @@ const generateRandomString = (length = 6) => {
   return (Math.random().toString(36).substr(2, length));
 };
 
-   
+const urlsForUser = (id, database) => {
+  let userUrls = {};
+
+  for (const shortURL in database) {
+    if (database[shortURL].userID === id) {
+      userUrls[shortURL] = database[shortURL];
+    }
+  }
+  return userUrls;
+};
 
   
 
 module.exports = {
   getUserByEmail,
   generateRandomString,
-  authenticateUser
+  authenticateUser,
+  urlsForUser
 };
    
