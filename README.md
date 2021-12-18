@@ -13,10 +13,11 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of Account page - the list of long URLs and converted short URLS, with edit and delete buttons"](https://github.com/EvilDoll69/tinyapp/blob/feature/user-registration/docs/User%20Account.png)
-!["Screenshot of New User Registration page"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Register%20Form.png)
-!["Screenshot of Login page"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Login%20Form.png)
-!["Screenshot of URL converter page, where the original long URL can be altered by user"](https://github.com/EvilDoll69/tinyapp/blob/feature/user-registration/docs/Submitting%20URL.png)
+!["Screenshot of Start page with the Login and Registration button and a message"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Start%20page.png)
+!["Screenshot of Account page - the list of long URLs and converted short URLS, with edit and delete buttons"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/MyURLs%20page.png)
+!["Screenshot of New User Registration page"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Register%20page.png)
+!["Screenshot of Login page"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Login%20Page.png)
+!["Screenshot of URL converter page, where the original long URL can be altered by user"](https://github.com/EvilDoll69/tinyapp/blob/master/docs/Editing%20page.png)
 
 ## Dependencies by user
 
