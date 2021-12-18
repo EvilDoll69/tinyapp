@@ -15,6 +15,7 @@ const salt = bcrypt.genSaltSync(10);
 
 
 
+
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -38,6 +39,7 @@ const usersDB = {
     password: "dishwasher-funk",
   },
 }; 
+
 
 
 //testing purposes
@@ -65,19 +67,19 @@ app.get("/register", (req, res) => {
 
 //Only show links to users that creates them
 app.get("/urls", (req, res) => {
-  const userID = req.session.user_id;
-  
-  if(userID) {
-    const urlUserObject = urlsForUser(userID, urlDatabase);
-    const templateVars = {
-      urls: urlUserObject,
-      user: usersDB[req.session.user_id],
-    };
-    return res.render("urls_index", templateVars);
-  }
-  res.redirect("/login");
-})
+  const user_id = req.session["user_id"];
+  const user = usersDB[user_id];
+  const urls = {};
 
+  for (let url in urlDatabase) {
+    ///adding urls to the new urls / belongs to the user
+    if (user_id === urlDatabase[url].userID) {
+      urls[url] = urlDatabase[url].longURL;
+    }
+  }
+  const templateVars = { urls: urls, user: user };
+  res.render("urls_index", templateVars);
+});
 
 //Redirect a user to log in if it tries to access create link
 app.get("/urls/new", (req, res) => {
@@ -117,7 +119,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 // *************************************POST ENDPOINTS*******************************************
 
-//Validation for editing Links
+
+//Validating users to edit links
 app.post("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const userUrls = urlsForUser(userID, urlDatabase);
