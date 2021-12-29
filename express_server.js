@@ -49,7 +49,7 @@ app.get("/urls.json", (req, res) => {
 
 //Redirect a user to register if not a valid user
 app.get("/", (req, res) => {
-  res.redirect("/register");
+  res.redirect("/urls");
 });
 
 //Handles Login request
