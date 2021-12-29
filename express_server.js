@@ -14,8 +14,6 @@ const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 
 
-
-
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -49,7 +47,7 @@ app.get("/urls.json", (req, res) => {
 
 //Redirect a user to register if not a valid user
 app.get("/", (req, res) => {
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 //Handles Login request
@@ -98,10 +96,14 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = usersDB[user_id];
 
   const { longURL } = urlDatabase[req.params.shortURL] || {};
-  if(!longURL) {
-    return res.status(404).send(`<h1 text-align: center; >STOP! TRYING TO access an invalid LINK!!!</h1>`)
-  }
   
+  if (!user || !longURL) {
+    res.status(404).send(`<h1 text-align: center; >STOP! TRYING TO access an invalid LINK!!!</h1>`);
+  } else if (user_id !== urlDatabase[req.params.shortURL].userID) {
+    return res.status(404).send(`<h1 text-align: center; >STOP! TRYING TO access an invalid LINK!!!</h1>`);
+  }
+
+ 
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL,
